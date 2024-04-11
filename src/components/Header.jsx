@@ -1,10 +1,14 @@
 import React from 'react'
+import Logo from "./img/logo.png";
 
 const Header = () => {
   return (
-    <div className="fixed z-50 w-screen bg-slate-300 p-6 px-16">
+    <div className="fixed z-50 w-screen  p-6 px-16">
       {/* {desktop & tablet} */}
       <div className="hidden md:flex w-full h-full ">
+        <div className="flex items-start gap-2">
+          <img src={Logo}className="w-10 object-cover" alt="logo" />
+        </div>
         
       </div>
 
