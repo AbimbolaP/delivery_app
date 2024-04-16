@@ -6,7 +6,9 @@ import { MdAttachMoney, MdCloudUpload, MdDelete, MdFastfood, MdFoodBank } from '
 import Loader from './Loader';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { storage } from '../firebase.config';
-import { saveItem } from '../utils/firebaseFunctions';
+import { getAllFoodItems, saveItem } from '../utils/firebaseFunctions';
+import { useStateValue } from '../context/StateProvider';
+import { actionType } from '../context/reducer';
 
 const CreateContainer = () => {
   const [title, setTitle] = useState("");
@@ -18,6 +20,8 @@ const CreateContainer = () => {
   const [alertStatus, setAlertStatus] = useState("danger");
   const [msg, setMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [{ foodItems }, dispatch] = useStateValue();
 
   const uploadImage = (e) => {
     setIsLoading(true);
@@ -102,7 +106,7 @@ const CreateContainer = () => {
         setFields(false)
         setIsLoading(false);
       }, 4000)
-    }
+    } fetchData();
   };
 
   const clearData = () => {
@@ -111,6 +115,15 @@ const CreateContainer = () => {
     setCalories("");
     setPrice("");
     setCategory("Select Category");
+  };
+
+  const fetchData = async () => {
+    await getAllFoodItems().then((data) => {
+      dispatch({
+        type: actionType.SET_FOOD_ITEMS,
+        foodItems: data,
+      });
+    });
   };
 
   return (
@@ -173,7 +186,7 @@ const CreateContainer = () => {
                     ):(
                     <>
                     <div className='relative h-full'>
-                      <img src={imageAsset} alt='uploaded image' className='w-full h-full object-cover'/>
+                      <img src={imageAsset} alt='food item' className='w-full h-full object-cover'/>
                       <button type='button' className='absolute bottom-3 right-3 p-3 rounded-full bg-red-500 text-xl cursor-pointer outline-none hover:shadow-md duration-500 transition-all ease-in-out'  onClick={deleteImage}>
                         <MdDelete className='text-white'/>
                       </button>
