@@ -6,11 +6,38 @@ import { useStateValue } from '../context/StateProvider';
 import { actionType } from '../context/reducer';
 import EmptyCart from '../img/emptyCart.svg'
 import CartItem from './CartItem';
+import { GoogleAuthProvider, getAuth, signInWithPopup } from 'firebase/auth';
+import { app } from '../firebase.config';
+import { PaystackButton } from 'react-paystack';
 
 const CartContainer = () => {
   const [{cartShow, cartItems, user }, dispatch] = useStateValue();
   const [flag, setFlag] = useState(1);
   const [tot, setTot] = useState(0)
+
+  const firebaseAuth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  const [isMenu, setIsMenu] = useState(false);
+
+  const publicKey = "pk_test_f53f706c8701b54ddcf4100bd2e4c212904cc84c";
+  const amount = ((tot + 2.5) * 100); 
+  const email = user?.email;
+  
+
+  const login = async () => {
+    if (!user) {
+      const {
+        user : {refreshToken, providerData}} = await signInWithPopup(firebaseAuth, provider);
+      dispatch({
+      type: actionType.SET_USER,
+      user : providerData[0],
+      });
+      localStorage.setItem('user', JSON.stringify(providerData[0]));
+    } else {
+      setIsMenu(!isMenu);
+    }
+  };
 
   const showCart = () => {
     dispatch({
@@ -29,11 +56,20 @@ const CartContainer = () => {
 
   const clearCart = () => {
     dispatch({
-      type: actionType.SET_CARTITEMS,
+      type: actionType.SET_CART_ITEMS,
       cartItems: [],
     });
 
     localStorage.setItem("cartItems", JSON.stringify([]));
+  };
+
+  const paymentProps = {
+    email,
+    amount,
+    publicKey,
+    text : "Check Out",
+    onSuccess: () => alert ("Thank you"),
+    onClose: () => alert("Are you sure you want to?")
   };
 
   return (
@@ -96,18 +132,20 @@ const CartContainer = () => {
 
           {
             user ? (
-              <motion.button 
-              whileTap={{scale:0.8}}
-              type="button"
-              className='w-full p-2 rounded-full bg-gradient-to-tr from-orange-400 to-orange-600 text-gray-50 text-lg my-2 hover:shadow-lg'
-              >
-                Check Out
-              </motion.button>
+                <motion.button 
+                whileTap={{scale:0.8}}
+                type="button"
+                className='w-full  p-2 rounded-full bg-gradient-to-tr from-orange-400 to-orange-600 text-gray-50 text-lg my-2 hover:shadow-lg text-center'
+                >
+                 <PaystackButton {...paymentProps}/>
+                </motion.button>
+              
               ) :(
               <motion.button 
               whileTap={{scale:0.8}}
               type="button"
               className='w-full p-2 rounded-full bg-gradient-to-tr from-orange-400 to-orange-600 text-gray-50 text-lg my-2 hover:shadow-lg'
+              onClick={login}
               >
                 Login to Check Out
               </motion.button>
