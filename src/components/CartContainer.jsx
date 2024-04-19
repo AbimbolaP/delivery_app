@@ -48,11 +48,10 @@ const CartContainer = () => {
 
   useEffect(() => {
     let totalPrice = cartItems.reduce(function (accumulator, item) {
-      return accumulator + item.qty * item.price;
+      return accumulator + (item.qty * item.price);
     }, 0);
     setTot(totalPrice);
-    console.log(tot);
-  },[tot, flag]);
+  },[cartItems, flag]);
 
   const clearCart = () => {
     dispatch({
@@ -68,7 +67,10 @@ const CartContainer = () => {
     amount,
     publicKey,
     text : "Check Out",
-    onSuccess: () => alert ("Thank you"),
+    onSuccess: () => {
+      alert ("Thank you"); 
+      clearCart()
+    },
     onClose: () => alert("Are you sure you want to?")
   };
 
